@@ -772,9 +772,16 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 else
-KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS   += -O2
+ifeq ($(cc-name),gcc)
+KBUILD_CFLAGS	+= -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a76.cortex-a55
 endif
-
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS	+= -mcpu=cortex-a76 -mtune=cortex-a76
+ifdef CONFIG_LTO_CLANG
+KBUILD_CFLAG	+= -fwhole-program-vtables
+endif
 ifdef CONFIG_LLVM_POLLY
 KBUILD_CFLAGS	+= -mllvm -polly \
 		           -mllvm -polly-run-inliner \
@@ -785,6 +792,15 @@ KBUILD_CFLAGS	+= -mllvm -polly \
 		           -mllvm -polly-detect-keep-going \
 		           -mllvm -polly-vectorizer=stripmine \
 		           -mllvm -polly-invariant-load-hoisting
+# Polly may optimise loops with dead paths beyound what the linker
+# # can understand. This may negate the effect of the linker's DCE
+# # so we tell Polly to perfom proven DCE on the loops it optimises
+# # in order to preserve the overall effect of the linker's DCE.
+ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
+KBUILD_CFLAGS	+= -mllvm -polly-run-dce
+endif
+endif
+endif
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
