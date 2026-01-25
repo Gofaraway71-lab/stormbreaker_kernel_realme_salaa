@@ -20,12 +20,11 @@ config OPPO_COMMON_SOFT
 	id.
 
 config OPPO_DEVICE_IFNO
-  bool "config devinfo"
-  tristate "config oppo devinfo"
+  bool "config oppo devinfo"
   select OPPO_ARCH_FILE
   help
-	define this config to compile devinfo.c for device register
-		.
+	define this config to compile devinfo.c for device register.
+
 config OPLUS_BUG_STABILITY_EFFECTON_QGKI
   tristate "config stability bug fixing effect on qgki"
   help
